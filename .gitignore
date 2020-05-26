@@ -1,7 +1,7 @@
 *__pycache__*
 *.ipynb_checkpoints*
-data/
-images/
-build/
-dist/
 *egg-info/
+data/
+models/
+images/
+
