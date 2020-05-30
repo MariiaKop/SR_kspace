@@ -4,4 +4,6 @@
 data/
 models/
 images/
+build/
+dist
 
