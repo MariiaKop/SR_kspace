@@ -125,6 +125,31 @@ def complex_abs(data):
     return (data ** 2).sum(dim=-1).sqrt()
 
 
+def angle(data):
+    assert data.size(-1) == 2
+    return torch.atan2(data[..., 1], data[..., 0])
+
+
+def spec_phase_to_complex(spec, phase):
+    k_space = torch.stack([torch.cos(phase), torch.sin(phase)], dim=-1)
+    return spec.exp().unsqueeze(-1) * k_space
+
+
+def min_max_scale(data):
+    data = data - data.min()
+    data = data / data.max()
+
+    return data
+
+
+def k_space_to_image(data, scale=True):
+    data = ifft2(data)
+    data = complex_abs(data)
+    if scale:
+        data = min_max_scale(data)
+
+    return data
+
 def complex_abs_sq(data):
     """
     Compute the squared absolute value of a complex tensor
