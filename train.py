@@ -19,12 +19,15 @@ from sr_kspace.loss import GeneratorLoss
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
 
-def inference(netG, lr_kspace, h_LR, h_HR, skipped_connection):
+def inference(netG, lr_kspace, h_LR, h_HR, opt):
     input = lr_kspace/h_LR
     input /= abs(input).max()
     out = netG(input) * h_HR
-    if skipped_connection:
-        out[..., 80:240, 80:240] = out[..., 80:240, 80:240] + lr_kspace
+    if opt.skip_connection:
+        if opt.upscale_factor == 2:
+            out[..., 80:240, 80:240] = out[..., 80:240, 80:240] + lr_kspace
+        if opt.upscale_factor == 4:
+            out[..., 120:200, 120:200] = out[..., 120:200, 120:200] + lr_kspace
 
     out = T.k_space_to_image(out, shift=True)
 
