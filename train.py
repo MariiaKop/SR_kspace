@@ -208,9 +208,11 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
             valing_results['psnr'] += calculate_psnr(hr_img, sr_img) * batch_size
 
             val_bar.set_description(
-                desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
+                desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f MAE: %.4f' % (
                     valing_results['psnr']/valing_results['batch_sizes'], 
-                    valing_results['ssim']/valing_results['batch_sizes']))
+                    valing_results['ssim']/valing_results['batch_sizes'],
+                    valing_results['mae']/valing_results['batch_sizes'],
+                    ))
 
 
         save_images(hr_img, sr_img, abs(sr_img - hr_img), 
