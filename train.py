@@ -161,7 +161,7 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
                 hr_img = hr_img.cuda()
                 lr_kspace = lr_kspace.cuda()
 
-            fake_img = inference(netG, lr_kspace, h_LR, h_HR, opt.skip_connection)
+            fake_img = inference(netG, lr_kspace, h_LR, h_HR, opt)
 
             netD.zero_grad()
             real_out = netD(hr_img).mean()
@@ -175,7 +175,7 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
             g_loss = generator_criterion(fake_out, gray2rgb(fake_img), gray2rgb(hr_img))
             g_loss.backward()
 
-            fake_img = inference(netG, lr_kspace, h_LR, h_HR, opt.skip_connection)
+            fake_img = inference(netG, lr_kspace, h_LR, h_HR, opt)
             fake_out = netD(fake_img).mean()
 
             optimizerG.step()
@@ -204,7 +204,7 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
                 hr_img = hr_img.cuda()
                 lr_kspace = lr_kspace.cuda()
 
-            sr_img = inference(netG, lr_kspace, h_LR, h_HR, opt.skip_connection)
+            sr_img = inference(netG, lr_kspace, h_LR, h_HR, opt)
 
             valing_results['mae'] += calculate_mae(hr_img, sr_img) * batch_size
             valing_results['ssim'] += calculate_ssim(hr_img, sr_img) * batch_size
