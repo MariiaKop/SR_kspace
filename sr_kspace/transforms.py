@@ -25,34 +25,6 @@ def to_tensor(data):
     return torch.from_numpy(data)
 
 
-def apply_mask(data, mask_func, seed=None, padding=None):
-    """
-    Subsample given k-space by multiplying with a mask.
-
-    Args:
-        data (torch.Tensor): The input k-space data. This should have at least 3 dimensions, where
-            dimensions -3 and -2 are the spatial dimensions, and the final dimension has size
-            2 (for complex values).
-        mask_func (callable): A function that takes a shape (tuple of ints) and a random
-            number seed and returns a mask.
-        seed (int or 1-d array_like, optional): Seed for the random number generator.
-
-    Returns:
-        (tuple): tuple containing:
-            masked data (torch.Tensor): Subsampled k-space data
-            mask (torch.Tensor): The generated mask
-    """
-    shape = np.array(data.shape)
-    shape[:-3] = 1
-    mask = mask_func(shape, seed)
-    if padding is not None:
-        mask[:, :, :padding[0]] = 0
-        mask[:, :, padding[1]:] = 0 # padding value inclusive on right of zeros
-
-    masked_data = data * mask + 0.0 # The + 0.0 removes the sign of the zeros
-    return masked_data, mask
-
-
 def mask_center(x, mask_from, mask_to):
     b, c, h, w, two = x.shape
     mask = torch.zeros_like(x)
@@ -142,13 +114,21 @@ def min_max_scale(data):
     return data
 
 
-def k_space_to_image(data, scale=True):
+def k_space_to_image(data, scale=True, shift=False):
+    data = data.transpose(-2, -3).transpose(-1, -2)
     data = ifft2(data)
+
+    if shift:
+        data = fftshift(data)
+
     data = complex_abs(data)
+    data = data.unsqueeze(-3)
+
     if scale:
         data = min_max_scale(data)
 
     return data
+
 
 def complex_abs_sq(data):
     """
