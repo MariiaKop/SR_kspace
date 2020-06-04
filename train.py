@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 import torch
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, RandomSampler
 
 from sr_kspace import transforms as T
 from sr_kspace.model import Generator, Discriminator
@@ -44,6 +44,7 @@ def parse_args():
     parser.add_argument('--lr', default=1e-3, type=float, help='Learning rate')
     parser.add_argument('--batch_size', default=64, type=int, help='Batch size for train loader')
     parser.add_argument('--random_state', default=None, type=int, help='Random state')
+    parser.add_argument('--random_subset', default=None, type=int, help='Size of subset for each epoch')
 
 
     return parser.parse_args()
@@ -63,13 +64,20 @@ def load_h(path_to_data):
     return h_HR, h_LR
 
 
-def init_data_loaders(path_to_data, upscale_factor, batch_size):
+def init_data_loaders(opt):
+    path_to_data = opt.path_to_data
     train_set = SRKspaceData(os.path.join(path_to_data, 'ax_t2_source_train'), 
-                             os.path.join(path_to_data, f'ax_t2_re_im_{320//upscale_factor}_train'))
+                             os.path.join(path_to_data, f'ax_t2_re_im_{320//opt.upscale_factor}_train'))
     val_set = SRKspaceData(os.path.join(path_to_data, 'ax_t2_source_val'), 
-                             os.path.join(path_to_data, f'ax_t2_re_im_{320//upscale_factor}_val'))
+                             os.path.join(path_to_data, f'ax_t2_re_im_{320//opt.upscale_factor}_val'))
 
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
+    if opt.random_subset:
+        sampler = RandomSampler(train_set, replacement=True, num_samples=opt.random_subset)
+        train_loader = DataLoader(train_set, sampler=sampler, batch_size=opt.batch_size,
+                                             shuffle=False, num_workers=4)
+    else:
+        train_loader = DataLoader(train_set, batch_size=opt.batch_size, shuffle=True, num_workers=4)
+
     val_loader = DataLoader(val_set, batch_size=1, shuffle=False, num_workers=4)
 
     return train_loader, val_loader
@@ -99,9 +107,10 @@ def main():
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print(f'Device: {device}')
+    print(opt, end='\n\n')
 
     h_HR, h_LR = load_h(opt.path_to_data)
-    train_loader, val_loader = init_data_loaders(opt.path_to_data, opt.upscale_factor, opt.batch_size)
+    train_loader, val_loader = init_data_loaders(opt)
     netG, netD, generator_criterion = init_nets(opt)
 
     optimizerG = optim.Adam(netG.parameters(), lr=opt.lr)
@@ -176,7 +185,7 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
                 running_results['d_score'] / running_results['batch_sizes'],
                 running_results['g_score'] / running_results['batch_sizes']))
 
-            break
+            #break
 
 
         netG.eval()
