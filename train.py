@@ -112,7 +112,7 @@ def main():
     print(f'Device: {device}')
     print(opt, end='\n\n')
 
-    h_HR, h_LR = load_h(opt.path_to_data)
+    h_HR, h_LR = load_h(opt)
     train_loader, val_loader = init_data_loaders(opt)
     netG, netD, generator_criterion = init_nets(opt)
 
