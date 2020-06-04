@@ -192,7 +192,7 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
         val_bar = tqdm(val_loader)
         valing_results = {'mae': 0, 'ssims': 0, 'psnr': 0, 'ssim': 0, 'batch_sizes': 0}
 
-        for i, (hr_img, lr_kspace) in enumerate(val_bar):
+        for hr_img, lr_kspace in val_bar:
             batch_size = hr_img.size(0)
             valing_results['batch_sizes'] += batch_size
             if torch.cuda.is_available():
@@ -211,11 +211,10 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
                 desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
                     valing_results['psnr'], valing_results['ssim']))
 
-            break
+            #break
 
         save_images(hr_img, sr_img, abs(sr_img - hr_img), 
                     path=os.path.join(out_path, 'images', f'val_{label}_{epoch}.png'))
-        
 
         torch.save(netG.state_dict(), 
                 os.path.join(out_path, 'models', f'netG_epoch_{label}_{epoch}.pth'))
