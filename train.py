@@ -35,8 +35,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train Super Resolution Models')
 
     parser.add_argument('--channels', default=64, type=int, help='Number of channels in Residual blocks')
-    parser.add_argument('--skip_connection', default=True, type=bool, help='Skip connection')
-    parser.add_argument('--bias', default=True, type=bool, help='Bias in Conv layers for Generator')
+    parser.add_argument('--skip_connection', default=1, type=int, help='Skip connection')
+    parser.add_argument('--bias', default=1, type=int, help='Bias in Conv layers for Generator')
     parser.add_argument('--upscale_factor', default=2, type=int, choices=[2, 4],
                         help='Super resolution upscale factor')
     parser.add_argument('--epochs', default=10, type=int, help='Train epoch number')
