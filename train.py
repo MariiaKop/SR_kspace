@@ -51,9 +51,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_h(path_to_data):
-    h_HR = np.load(os.path.join(path_to_data, 'hr_mean_kspace.npy'))
-    h_LR = np.load(os.path.join(path_to_data, 'lr_mean_kspace.npy'))
+def load_h(opt):
+    h_HR = np.load(os.path.join(opt.path_to_data, 'hr_mean_kspace.npy'))
+    h_LR = np.load(os.path.join(opt.path_to_data, f'lr_{320//opt.upscale_factor}_mean_kspace.npy'))
 
     h_HR = torch.from_numpy(h_HR)
     h_LR = torch.from_numpy(h_LR)
