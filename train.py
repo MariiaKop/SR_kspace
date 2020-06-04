@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, RandomSampler
 
 from sr_kspace import transforms as T
 from sr_kspace.model import Generator, Discriminator
-from sr_kspace.utils import SRKspaceData, gray2rgb, calculate_ssim, calculate_psnr, save_images
+from sr_kspace.utils import SRKspaceData, gray2rgb, calculate_ssim, calculate_psnr, save_images, calculate_mae
 from sr_kspace.loss import GeneratorLoss
 
 
@@ -45,6 +45,7 @@ def parse_args():
     parser.add_argument('--batch_size', default=64, type=int, help='Batch size for train loader')
     parser.add_argument('--random_state', default=None, type=int, help='Random state')
     parser.add_argument('--random_subset', default=None, type=int, help='Size of subset for each epoch')
+    parser.add_argument('--val_size', default=None, type=int, help='Size of val set')
 
 
     return parser.parse_args()
@@ -70,6 +71,8 @@ def init_data_loaders(opt):
                              os.path.join(path_to_data, f'ax_t2_re_im_{320//opt.upscale_factor}_train'))
     val_set = SRKspaceData(os.path.join(path_to_data, 'ax_t2_source_val'), 
                              os.path.join(path_to_data, f'ax_t2_re_im_{320//opt.upscale_factor}_val'))
+    if opt.val_size:
+        val_set.data = val_set.data[:opt.val_size]
 
     if opt.random_subset:
         sampler = RandomSampler(train_set, replacement=True, num_samples=opt.random_subset)
@@ -138,6 +141,7 @@ def main():
 def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD, 
           h_HR, h_LR, train_loader, val_loader, out_path, label):
     results = {'d_loss': [], 'g_loss': [], 'd_score': [], 'g_score': [], 'psnr': [], 'ssim': [], 'mae': []}
+    val_size = opt.val_size if opt.val_size else 1e15
 
     for epoch in range(1, opt.epochs + 1):
         train_bar = tqdm(train_loader)
@@ -185,14 +189,12 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
                 running_results['d_score'] / running_results['batch_sizes'],
                 running_results['g_score'] / running_results['batch_sizes']))
 
-            #break
-
-
         netG.eval()
         val_bar = tqdm(val_loader)
-        valing_results = {'mae': 0, 'ssims': 0, 'psnr': 0, 'ssim': 0, 'batch_sizes': 0}
+        valing_results = {'mae': 0, 'psnr': 0, 'ssim': 0,  'batch_sizes': 0}
 
         for hr_img, lr_kspace in val_bar:
+
             batch_size = hr_img.size(0)
             valing_results['batch_sizes'] += batch_size
             if torch.cuda.is_available():
@@ -201,17 +203,15 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
 
             sr_img = inference(netG, lr_kspace, h_LR, h_HR, opt.skip_connection)
 
-            batch_mae = abs(sr_img - hr_img).data.mean().item()
-            valing_results['mae'] += batch_mae * batch_size
-            batch_ssim = calculate_ssim(sr_img, hr_img)
-            valing_results['ssims'] += batch_ssim * batch_size
-            valing_results['psnr'] = calculate_psnr(hr_img, sr_img, valing_results['batch_sizes'])
-            valing_results['ssim'] = valing_results['ssims'] / valing_results['batch_sizes']
+            valing_results['mae'] += calculate_mae(hr_img, sr_img) * batch_size
+            valing_results['ssim'] += calculate_ssim(hr_img, sr_img) * batch_size
+            valing_results['psnr'] += calculate_psnr(hr_img, sr_img) * batch_size
+
             val_bar.set_description(
                 desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
-                    valing_results['psnr'], valing_results['ssim']))
+                    valing_results['psnr']/valing_results['batch_sizes'], 
+                    valing_results['ssim']/valing_results['batch_sizes']))
 
-            #break
 
         save_images(hr_img, sr_img, abs(sr_img - hr_img), 
                     path=os.path.join(out_path, 'images', f'val_{label}_{epoch}.png'))
@@ -226,9 +226,9 @@ def train(opt, netG, netD, generator_criterion, optimizerG, optimizerD,
         results['g_loss'].append(running_results['g_loss'] / running_results['batch_sizes'])
         results['d_score'].append(running_results['d_score'] / running_results['batch_sizes'])
         results['g_score'].append(running_results['g_score'] / running_results['batch_sizes'])
-        results['psnr'].append(valing_results['psnr'])
-        results['ssim'].append(valing_results['ssim'])
-        results['mae'].append(valing_results['mae'])
+        results['psnr'].append(valing_results['psnr'] / valing_results['batch_sizes'])
+        results['ssim'].append(valing_results['ssim'] / valing_results['batch_sizes'])
+        results['mae'].append(valing_results['mae'] / valing_results['batch_sizes'])
 
         if epoch % 1 == 0:
             data_frame = pd.DataFrame(

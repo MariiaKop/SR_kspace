@@ -40,13 +40,18 @@ def gray2rgb(gray):
     return rgb
 
 
+def calculate_mae(img1, img2):
+    return abs(img1 - img2).data.mean().item()
+
+
 def calculate_ssim(img1, img2):
     img1, img2 = img1[0, 0], img2[0, 0]
     return compare_ssim(img1.detach().cpu().numpy(), img2.detach().cpu().numpy())
 
 
-def calculate_psnr(hr_img, sr_img, batch_size):
-    return 10 * log10((hr_img.max()**2) / (((sr_img - hr_img)** 2).data.mean() / batch_size))
+def calculate_psnr(hr_img, sr_img):
+    mse = ((sr_img - hr_img)**2).data.mean()
+    return 10 * log10(hr_img.max()**2 / mse)
 
 
 def save_images(*images, path):
