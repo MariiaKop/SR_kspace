@@ -222,7 +222,7 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
             valing_results['ssim'] += calculate_ssim(hr, sr) * batch_size
             valing_results['psnr'] += calculate_psnr(hr, sr) * batch_size
             val_bar.set_description(
-                desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
+                desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f MAE: %.4f' % (
                     valing_results['psnr']/valing_results['batch_sizes'], 
                     valing_results['ssim']/valing_results['batch_sizes'],
                     valing_results['mae']/valing_results['batch_sizes'],
