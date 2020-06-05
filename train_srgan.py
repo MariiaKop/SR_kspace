@@ -171,13 +171,6 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
           train_loader, val_loader, out_path, label):
     results = {'vgg_loss': [], 'psnr': [], 'ssim': [], 'mae': [], 'mse': []}
 
-    label = f'srgan_{opt.upscale_factor}'
-
-    out_path = f'results/{label}/'
-    os.makedirs(os.path.join(out_path, 'images'), exist_ok=True)
-    os.makedirs(os.path.join(out_path, 'models'), exist_ok=True)
-
-
     for epoch in range(1, opt.epochs + 1):
         train_bar = tqdm(train_loader)
         running_results = {'batch_sizes': 0, 'mse': 0, 'vgg_loss': 0}
