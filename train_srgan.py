@@ -220,7 +220,10 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
             valing_results['psnr'] += calculate_psnr(hr, sr) * batch_size
             val_bar.set_description(
                 desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
-                    valing_results['psnr'], valing_results['ssim']))
+                    valing_results['psnr']/valing_results['batch_sizes'], 
+                    valing_results['ssim']/valing_results['batch_sizes'],
+                    valing_results['mae']/valing_results['batch_sizes'],
+                    ))
 
             #break
 
@@ -233,9 +236,9 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
 
         results['mse'].append(running_results['mse'] / running_results['batch_sizes'])
         results['vgg_loss'].append(running_results['vgg_loss'] / running_results['batch_sizes'])
-        results['psnr'].append(valing_results['psnr'])
-        results['ssim'].append(valing_results['ssim'])
-        results['mae'].append(valing_results['mae'])
+        results['psnr'].append(valing_results['psnr'] / valing_results['batch_sizes'])
+        results['ssim'].append(valing_results['ssim'] / valing_results['batch_sizes'])
+        results['mae'].append(valing_results['mae'] / valing_results['batch_sizes'])
 
         if epoch % 1 == 0:
             data_frame = pd.DataFrame(
