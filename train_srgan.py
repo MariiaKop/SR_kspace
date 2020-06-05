@@ -199,7 +199,7 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
                 epoch, opt.epochs, running_results['mse'] / running_results['batch_sizes'],
                 running_results['vgg_loss'] / running_results['batch_sizes']))
 
-            break
+            #break
 
 
         netG.eval()
@@ -222,7 +222,7 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
                 desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
                     valing_results['psnr'], valing_results['ssim']))
 
-            break
+            #break
 
         save_images(hr, sr, abs(sr - hr), 
                     path=os.path.join(out_path, 'images', f'val_{label}_{epoch}.png'))
