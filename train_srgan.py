@@ -130,6 +130,8 @@ def main():
 
     netG = Generator(opt.upscale_factor, input_channels=1, output_channels=1)
     copy_res_layers(netG)
+    if torch.cuda.is_available():
+        netG.cuda()
     print('Number of params:', sum(p.numel() for p in netG.parameters() if p.requires_grad))
 
     criterion = nn.MSELoss()
