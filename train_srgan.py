@@ -184,6 +184,8 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
                 lr = lr.cuda()
 
             sr = netG(lr)
+            sr = (torch.tanh(sr) + 1) / 2
+
             loss = criterion(hr, sr)
             vgg_loss = vgg_criterion(hr, sr)
 
@@ -214,6 +216,7 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
                 lr = lr.cuda()
 
             sr = netG(lr)
+            sr = (torch.tanh(sr) + 1) / 2
 
             valing_results['mae'] += calculate_mae(hr, sr) * batch_size
             valing_results['ssim'] += calculate_ssim(hr, sr) * batch_size
