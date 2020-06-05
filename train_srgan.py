@@ -76,6 +76,8 @@ def parse_args():
     parser.add_argument('--random_subset', default=None, type=int, help='Size of subset for each epoch')
     parser.add_argument('--val_size', default=None, type=int, help='Size of val set')
     parser.add_argument('--pretrained', default=1, type=int, help='Do use pretrained res layers')
+    parser.add_argument('--freeze', default=1, type=int, help='Do freeze res layers')
+
 
     return parser.parse_args()
 
@@ -100,7 +102,7 @@ def init_data_loaders(opt):
     return train_loader, val_loader
 
 
-def copy_res_layers(netG):
+def copy_res_layers(netG, freeze):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     pretrained_G = Generator(4)
     x4_params = torch.load(PATH_TO_X4_MODEL, map_location=device)
@@ -112,10 +114,11 @@ def copy_res_layers(netG):
     netG.block5.load_state_dict(pretrained_G.block5.state_dict())
     netG.block6.load_state_dict(pretrained_G.block6.state_dict())
 
-    static_layers = [f'block{i}' for i in range(2, 7)]
-    for k, w in netG.named_parameters():
-        if any(k.startswith(l) for l in static_layers):
-            w.requires_grad = False
+    if freeze:
+        static_layers = [f'block{i}' for i in range(2, 7)]
+        for k, w in netG.named_parameters():
+            if any(k.startswith(l) for l in static_layers):
+                w.requires_grad = False
 
 
 def main():
@@ -131,7 +134,7 @@ def main():
 
     netG = Generator(opt.upscale_factor, input_channels=1, output_channels=1)
     if opt.pretrained:
-        copy_res_layers(netG)
+        copy_res_layers(netG, opt.freeze)
 
     print('Number of params:', sum(p.numel() for p in netG.parameters() if p.requires_grad))
 
@@ -145,7 +148,10 @@ def main():
         netG.cuda()
         vgg_criterion.cuda()
 
-    label = f'srgan_{opt.upscale_factor}'
+    full = '_pre' if opt.pretrained else '_full'
+    freeze = '_freez' if opt.freeze else ''
+
+    label = f'srgan{full}{freeze}_{opt.upscale_factor}'
     print('Model:', label)
 
     out_path = f'results/{label}/'
