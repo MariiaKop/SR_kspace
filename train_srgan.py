@@ -75,6 +75,7 @@ def parse_args():
     parser.add_argument('--random_state', default=None, type=int, help='Random state')
     parser.add_argument('--random_subset', default=None, type=int, help='Size of subset for each epoch')
     parser.add_argument('--val_size', default=None, type=int, help='Size of val set')
+    parser.add_argument('--pretrained', default=1, type=int, help='Do use pretrained res layers')
 
     return parser.parse_args()
 
@@ -129,8 +130,9 @@ def main():
     print(opt, end='\n\n')
 
     netG = Generator(opt.upscale_factor, input_channels=1, output_channels=1)
-    copy_res_layers(netG)
-    
+    if opt.pretrained:
+        copy_res_layers(netG)
+
     print('Number of params:', sum(p.numel() for p in netG.parameters() if p.requires_grad))
 
     criterion = nn.MSELoss()
