@@ -130,8 +130,7 @@ def main():
 
     netG = Generator(opt.upscale_factor, input_channels=1, output_channels=1)
     copy_res_layers(netG)
-    if torch.cuda.is_available():
-        netG.cuda()
+    
     print('Number of params:', sum(p.numel() for p in netG.parameters() if p.requires_grad))
 
     criterion = nn.MSELoss()
@@ -140,6 +139,9 @@ def main():
     optimizer = optim.Adam(netG.parameters(), lr=opt.lr)
 
     train_loader, val_loader = init_data_loaders(opt)
+    if torch.cuda.is_available():
+        netG.cuda()
+        vgg_criterion.cuda()
 
     label = f'srgan_{opt.upscale_factor}'
     print('Model:', label)
