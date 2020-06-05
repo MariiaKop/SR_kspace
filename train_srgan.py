@@ -209,9 +209,6 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
                 epoch, opt.epochs, running_results['mse'] / running_results['batch_sizes'],
                 running_results['vgg_loss'] / running_results['batch_sizes']))
 
-            #break
-
-
         netG.eval()
         val_bar = tqdm(val_loader)
         valing_results = {'mae': 0, 'ssims': 0, 'psnr': 0, 'ssim': 0, 'batch_sizes': 0}
@@ -230,13 +227,11 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
             valing_results['ssim'] += calculate_ssim(hr, sr) * batch_size
             valing_results['psnr'] += calculate_psnr(hr, sr) * batch_size
             val_bar.set_description(
-                desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f MAE: %.4f' % (
+                desc='\t PSNR: %.4f dB SSIM: %.4f MAE: %.4f' % (
                     valing_results['psnr']/valing_results['batch_sizes'], 
                     valing_results['ssim']/valing_results['batch_sizes'],
                     valing_results['mae']/valing_results['batch_sizes'],
                     ))
-
-            #break
 
         save_images(hr, sr, abs(sr - hr), 
                     path=os.path.join(out_path, 'images', f'val_{label}_{epoch}.png'))
