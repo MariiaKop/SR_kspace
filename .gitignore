@@ -5,5 +5,5 @@ data/
 models/
 images/
 build/
-dist
+dist/
 results/
