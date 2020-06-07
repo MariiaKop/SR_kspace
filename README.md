@@ -23,7 +23,7 @@ To confirm the results of the study were compared MAE, PSNR, SSIM metrics of all
 
 ### Results
 
-![](https://github.com/albellov/SR_kspace/blob/master/images/result.png?raw=true)
+![](https://github.com/albellov/SR_kspace/blob/master/images/results.png?raw=true)
 From top to bottom: *Bicubic, SRResNet, SRGAN, our*
 
 From left to right: *X2 and X4 upsampling*
