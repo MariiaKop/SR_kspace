@@ -21,7 +21,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
 def inference(netG, lr_kspace, h_LR, h_HR, opt):
     input = lr_kspace/h_LR
-    input /= abs(input).max()
+    #input /= abs(input).max()
     out = netG(input) * h_HR
     if opt.skip_connection:
         if opt.upscale_factor == 2:

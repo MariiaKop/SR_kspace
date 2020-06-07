@@ -228,7 +228,6 @@ def train(opt, netG, vgg_criterion, criterion, optimizer,
 
         save_images(hr, sr, abs(sr - hr), 
                     path=os.path.join(out_path, 'images', f'val_{label}_{epoch}.png'))
-        
 
         torch.save(netG.state_dict(), 
                 os.path.join(out_path, 'models', f'netG_epoch_{label}_{epoch}.pth'))
