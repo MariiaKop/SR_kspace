@@ -24,14 +24,43 @@ To confirm the results of the study were compared MAE, PSNR, SSIM metrics of all
 ### Results
 
 ![](https://github.com/albellov/SR_kspace/blob/master/images/results.png?raw=true)
-From top to bottom: *Bicubic, SRResNet, SRGAN, our*
-
-From left to right: *X2 and X4 upsampling*
-
 
 ### Using
 
+#### Install the environment
 ```
 pip install -r requirements.txt
 python setup.py install
 ```
+
+#### Download and unpack the [data](https://yadi.sk/d/WjK5J8uL5R4YoQ) to `SR_kspace/data`
+#### Train the model
+```
+python train.py [-h] [--channels CHANNELS] [--skip_connection SKIP_CONNECTION]
+                [--bias BIAS] [--upscale_factor {2,4}] [--epochs EPOCHS]
+                [--path_to_data PATH_TO_DATA] [--lr LR]
+                [--batch_size BATCH_SIZE] [--random_state RANDOM_STATE]
+                [--random_subset RANDOM_SUBSET] [--val_size VAL_SIZE]
+
+Train Super Resolution Models
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --channels CHANNELS   Number of channels in Residual blocks
+  --skip_connection SKIP_CONNECTION
+                        Skip connection
+  --bias BIAS           Bias in Conv layers for Generator
+  --upscale_factor {2,4}
+                        Super resolution upscale factor
+  --epochs EPOCHS       Train epoch number
+  --path_to_data PATH_TO_DATA
+                        Path to data
+  --lr LR               Learning rate
+  --batch_size BATCH_SIZE
+                        Batch size for train loader
+  --random_state RANDOM_STATE
+                        Random state
+  --random_subset RANDOM_SUBSET
+                        Size of subset for each epoch
+  --val_size VAL_SIZE   Size of val set
+  ```
